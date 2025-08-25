@@ -1,0 +1,93 @@
+# .github/workflows/auto-merge-latex.yml
+name: LaTeX PDF on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+env:
+  MAIN_TEX_FILE: report/main.tex
+
+jobs:
+  generate-pdf:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Compile LaTeX document
+      uses: xu-cheng/latex-action@v3
+      with:
+        root_file: main.tex
+        working_directory: report
+        args: -file-line-error -halt-on-error -interaction=nonstopmode
+        extra_system_packages: "py-pygments"
+    
+    - name: Debug - List files after compilation
+      run: |
+        ls -la report/
+        find report -name "*.pdf" -type f
+    
+    - name: Get current date and commit info
+      id: date
+      run: |
+        echo "date=$(date +'%Y-%m-%d-%H%M')" >> $GITHUB_OUTPUT
+        echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+    
+    - name: Create release with PDF
+      uses: softprops/action-gh-release@v1
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "pdf-${{ steps.date.outputs.date }}-${{ steps.date.outputs.short_sha }}"
+        name: "PDF Release ${{ steps.date.outputs.date }}"
+        body: |
+          Automatically generated PDF from merged PR #${{ github.event.pull_request.number }}
+          Commit: ${{ github.sha }}
+        draft: false
+        prerelease: false
+        files: report/main.pdf
+    
+    - name: Upload PDF as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: "latex-pdf-${{ steps.date.outputs.date }}"
+        path: report/main.pdf
+        retention-days: 30
+    
+    - name: Notify on success
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const releaseUrl = `https://github.com/${{ github.repository }}/releases/tag/pdf-${{ steps.date.outputs.date }}-${{ steps.date.outputs.short_sha }}`;
+          github.rest.issues.createComment({
+            issue_number: context.payload.pull_request.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `📄 PDF generated successfully! [Download here](${releaseUrl})`
+          });
+
+  notify-on-failure:
+    runs-on: ubuntu-latest
+    needs: [generate-pdf]
+    if: failure()
+    
+    steps:
+    - name: Notify on workflow failure
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const body = `❌ PDF generation failed for PR #${{ github.event.pull_request.number }}\n\nCheck logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+          github.rest.issues.createComment({
+            issue_number: context.payload.pull_request.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
