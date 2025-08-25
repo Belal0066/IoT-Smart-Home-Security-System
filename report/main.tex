@@ -1,1 +1,173 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% IEEE Conference Template for CSE356 IoT Project
+% - Structured for the 10-step IoT Design Methodology
+% - Configured for BibTeX (references.bib) and a figures folder
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% Set the path for your figures directory
+\graphicspath{{figures/}}
+
+\begin{document}
+
+% --- TITLE ---
+\title{Design and Prototyping of an IoT Smart Home Security System\\
+}
+
+% --- TEAM'S NAMES ---
+\author{\IEEEauthorblockN{Student Name 1}
+\IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
+\textit{Ain Shams University}\\
+Cairo, Egypt \\
+2@eng.asu.edu.eg}
+\and
+\IEEEauthorblockN{Student Name 2}
+\IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
+\textit{Ain Shams University}\\
+Cairo, Egypt \\
+2@eng.asu.edu.eg}
+\and
+\IEEEauthorblockN{Student Name 3}
+\IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
+\textit{Ain Shams University}\\
+Cairo, Egypt \\
+2@eng.asu.edu.eg}
+\and
+\IEEEauthorblockN{Student Name 4}
+\IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
+\textit{Ain Shams University}\\
+Cairo, Egypt \\
+2@eng.asu.edu.eg}
+\and
+\IEEEauthorblockN{Belal Anas Awad}
+\IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
+\textit{Ain Shams University}\\
+Cairo, Egypt \\
+21P0072@eng.asu.edu.eg}
+}
+
+\maketitle
+
+% --- ABSTRACT AND KEYWORDS ---
+\begin{abstract}
+This paper presents the complete 10-step design methodology for an IoT-based Smart Home Security System. The system is designed to detect unauthorized access through a network of sensors, capture evidence using cameras, and provide real-time alerts to the homeowner. The design covers all aspects from requirement analysis and system modeling to the specification of devices, services, and applications, culminating in a comprehensive blueprint for implementation and simulation.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Internet of Things, IoT, Smart Home, Security System, System Design, Cisco Packet Tracer
+\end{IEEEkeywords}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% --- START OF THE PROJECT REPORT BODY ---
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+
+The Internet of Things (IoT) has emerged as a transformative technology, connecting everyday objects to the internet and enabling intelligent automation and monitoring. One of the most impactful applications of IoT is in the domain of smart home systems, where connected devices enhance convenience, energy efficiency, and security. Home security, in particular, has seen significant innovation through IoT, moving from traditional isolated alarm systems to interconnected, responsive networks that provide homeowners with real-time awareness and control.
+
+This paper details the design of an IoT-based Smart Home Security System. The primary objective is to create a robust and reliable system that detects potential intrusions and promptly alerts the homeowner. To ensure a thorough and systematic design, we adhere to the 10-step IoT design methodology, covering all aspects from initial requirements to application development. The following sections will elaborate on each step of this methodology, providing a complete blueprint for the system's architecture and functionality.
+
+
+\section{IoT System Design Methodology}
+This section details the design of the Smart Home Security System following the prescribed 10-step methodology.
+
+% --- STEP 1 ---
+\subsection{Step 1: Purpose \& Requirements Specification}
+% --- Person 1 (SALMA) writes here ---
+% A. Purpose: Define the high-level goal of the system.
+% B. Functional Requirements: List the specific actions the system must perform.
+% C. Non-Functional Requirements: List the quality attributes (security, performance, etc.).
+
+% --- STEP 2 ---
+\subsection{Step 2: Process Specification}
+% --- Person 1 (SALMA) writes here ---
+% Describe the main processes of the system (e.g., intrusion detection, alerting).
+% You can add a flowchart figure here later.
+
+% --- STEP 3 ---
+\subsection{Step 3: Domain Model Specification}
+% --- Person 2 (AHMED) writes here ---
+% A. Identify and describe the key entities (Homeowner, Sensor, Hub, etc.).
+% B. Describe the relationships between these entities.
+% C. Include a UML Class Diagram.
+%
+% EXAMPLE FIGURE (Uncomment to use)
+% \begin{figure}[htbp]
+% \centerline{\includegraphics[width=0.9\columnwidth]{uml_diagram.png}}
+% \caption{Domain Model UML Class Diagram for the Smart Home Security System.}
+% \label{fig:uml}
+% \end{figure}
+
+% --- STEP 4 ---
+\subsection{Step 4: Information Model Specification}
+% --- Person 2 (AHMED) writes here ---
+% A. Specify the data generated by each component (e.g., sensor status, video stream).
+% B. Detail the structure and flow of information through the system.
+
+% --- STEP 5 ---
+\subsection{Step 5: Service Specifications}
+% --- Person 2 (AHMED) writes here ---
+% A. Define the services the system will offer (e.g., Monitoring Service, Alert Service).
+% B. Describe the interfaces and operations for each service.
+
+% --- STEP 6 ---
+\subsection{Step 6: IoT Level Specification}
+% --- Person 3 (BELAL) writes here ---
+% Specify the system's mapping to different IoT levels (e.g., Device, Network, Application).
+% Describe how these levels interact.
+
+% --- STEP 7 ---
+\subsection{Step 7: Functional View Specification}
+% --- Person 3 (BELAL) writes here ---
+% A. Detail the functional blocks of the system (e.g., Device Management, Data Processing).
+% B. Describe the interactions between these blocks.
+
+% --- STEP 8 ---
+\subsection{Step 8: Operational View Specification}
+% --- Person 3 (BELAL) writes here ---
+% Outline operational aspects like performance, reliability, security, and scalability.
+
+% --- STEP 9 ---
+\subsection{Step 9: Device \& Component Integration}
+% --- Person 4 (ADHAM) writes here ---
+% A. Detail the specific hardware (sensors, actuators, hub) to be used or simulated.
+% B. Explain how they will be interconnected and communicate (e.g., protocols like Wi-Fi, MQTT).
+
+% --- STEP 10 ---
+\subsection{Step 10: Application Development}
+% --- Person 5 (HAMSA) writes here ---
+% A. Describe the user-facing application (e.g., a mobile app).
+% B. Include user interface mockups and describe functionality (dashboard, notifications, etc.).
+
+
+\section{Conclusion}
+% Summarize the key design decisions made throughout the 10 steps.
+% Reiterate the capabilities of the proposed system.
+% Briefly mention future work or potential improvements.
+
+
+\section*{Acknowledgment}
+The authors wish to thank the teaching staff of the Computer and Systems Engineering Department at Ain Shams University for their guidance and support throughout this project.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% --- BIBLIOGRAPHY SECTION ---
+% This tells LaTeX to use the 'IEEEtran' style for references
+% and to look for them in the 'references.bib' file.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
