@@ -2,8 +2,8 @@
 name: LaTeX PDF on PR Merge
 
 on:
-  pull_request:
-    types: [closed]
+  push:
+    branches: [main]
 
 env:
   MAIN_TEX_FILE: report/main.tex
@@ -11,7 +11,7 @@ env:
 jobs:
   generate-pdf:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
       issues: write
@@ -26,13 +26,18 @@ jobs:
       with:
         root_file: main.tex
         working_directory: report
-        args: -file-line-error -halt-on-error -interaction=nonstopmode
+        args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
         extra_system_packages: "py-pygments"
+        latexmk_use_xelatex: false
     
     - name: Debug - List files after compilation
       run: |
+        echo "=== Files in root directory ==="
+        ls -la
+        echo "=== Files in report directory ==="
         ls -la report/
-        find report -name "*.pdf" -type f
+        echo "=== Looking for PDF files ==="
+        find . -name "*.pdf" -type f
     
     - name: Get current date and commit info
       id: date
@@ -49,17 +54,19 @@ jobs:
         tag_name: "pdf-${{ steps.date.outputs.date }}-${{ steps.date.outputs.short_sha }}"
         name: "PDF Release ${{ steps.date.outputs.date }}"
         body: |
-          Automatically generated PDF from merged PR #${{ github.event.pull_request.number }}
-          Commit: ${{ github.sha }}
+          Automatically generated PDF from commit ${{ github.sha }}
+          
+          Changes in this release:
+          ${{ github.event.head_commit.message }}
         draft: false
         prerelease: false
-        files: report/main.pdf
+        files: ./report/main.pdf
     
     - name: Upload PDF as artifact
       uses: actions/upload-artifact@v4
       with:
         name: "latex-pdf-${{ steps.date.outputs.date }}"
-        path: report/main.pdf
+        path: "report/*.pdf"
         retention-days: 30
     
     - name: Notify on success
@@ -67,10 +74,11 @@ jobs:
       with:
         script: |
           const releaseUrl = `https://github.com/${{ github.repository }}/releases/tag/pdf-${{ steps.date.outputs.date }}-${{ steps.date.outputs.short_sha }}`;
-          github.rest.issues.createComment({
-            issue_number: context.payload.pull_request.number,
+          
+          github.rest.repos.createCommitComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
+            commit_sha: context.sha,
             body: `📄 PDF generated successfully! [Download here](${releaseUrl})`
           });
 
@@ -84,10 +92,11 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
-          const body = `❌ PDF generation failed for PR #${{ github.event.pull_request.number }}\n\nCheck logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
-          github.rest.issues.createComment({
-            issue_number: context.payload.pull_request.number,
+          const body = `❌ PDF generation failed for commit ${{ github.sha }}\n\nCheck logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+          github.rest.repos.createCommitComment({
             owner: context.repo.owner,
             repo: context.repo.repo,
+            commit_sha: context.sha,
             body: body
           });
+
