@@ -1,0 +1,194 @@
+# .github/workflows/auto-merge-latex.yml
+name: Auto-merge and LaTeX PDF Generation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+env:
+  MAIN_TEX_FILE: report/main.tex  # directory structure
+
+jobs:
+  check-and-merge:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Configure git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+    
+    - name: Check if PR can be merged automatically
+      id: merge-check
+      run: |
+        # Fetch the latest changes
+        git fetch origin main
+        git fetch origin ${{ github.head_ref }}
+        
+        # Switch to the PR branch
+        git checkout ${{ github.head_ref }}
+        
+        # Try to merge main into the PR branch to check for conflicts
+        if git merge origin/main --no-commit --no-ff; then
+          echo "can_merge=true" >> $GITHUB_OUTPUT
+          git merge --abort  # Abort the test merge
+        else
+          echo "can_merge=false" >> $GITHUB_OUTPUT
+          git merge --abort || true  # Abort if possible
+        fi
+    
+    - name: Add merge status comment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const canMerge = '${{ steps.merge-check.outputs.can_merge }}' === 'true';
+          const body = canMerge 
+            ? '✅ This PR has no conflicts and will be auto-merged after PDF generation succeeds.'
+            : '❌ This PR has merge conflicts and cannot be auto-merged. Please resolve conflicts manually.';
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
+    
+    - name: Test LaTeX compilation on PR branch
+      if: steps.merge-check.outputs.can_merge == 'true'
+      uses: xu-cheng/latex-action@v3
+      with:
+        root_file: ${{ env.MAIN_TEX_FILE }}
+        args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
+        extra_system_packages: "py-pygments"
+        latexmk_use_xelatex: false  # no XeLaTeX
+    
+    - name: Auto-merge PR
+      if: steps.merge-check.outputs.can_merge == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          try {
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              merge_method: 'merge'  # Options: 'merge', 'squash', 'rebase'
+            });
+            console.log('PR merged successfully');
+          } catch (error) {
+            console.error('Failed to merge PR:', error);
+            throw error;
+          }
+
+  generate-pdf:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Compile LaTeX document
+      uses: xu-cheng/latex-action@v3
+      with:
+        root_file: ${{ env.MAIN_TEX_FILE }}
+        args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
+        extra_system_packages: "py-pygments"
+        latexmk_use_xelatex: false  # no XeLaTeX
+    
+    - name: Get current date and commit info
+      id: date
+      run: |
+        echo "date=$(date +'%Y-%m-%d-%H%M')" >> $GITHUB_OUTPUT
+        echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+    
+    - name: Create release with PDF
+      uses: actions/create-release@v1
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "pdf-${{ steps.date.outputs.date }}-${{ steps.date.outputs.short_sha }}"
+        release_name: "PDF Release ${{ steps.date.outputs.date }}"
+        body: |
+          Automatically generated PDF from commit ${{ github.sha }}
+          
+          Changes in this release:
+          ${{ github.event.head_commit.message }}
+        draft: false
+        prerelease: false
+    
+    - name: Upload PDF to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./report/main.pdf  # Updated for your directory structure
+        asset_name: "research-paper-${{ steps.date.outputs.date }}.pdf"
+        asset_content_type: application/pdf
+    
+    - name: Upload PDF as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: "latex-pdf-${{ steps.date.outputs.date }}"
+        path: "*.pdf"
+        retention-days: 30
+    
+    - name: Notify on success
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const releaseUrl = '${{ steps.create_release.outputs.html_url }}';
+          
+          github.rest.repos.createCommitComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            commit_sha: context.sha,
+            body: `📄 PDF generated successfully! [Download here](${releaseUrl})`
+          });
+
+  notify-on-failure:
+    runs-on: ubuntu-latest
+    needs: [check-and-merge, generate-pdf]
+    if: always() && (needs.check-and-merge.result == 'failure' || needs.generate-pdf.result == 'failure')
+    
+    steps:
+    - name: Notify on workflow failure
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const failedJobs = [];
+          if ('${{ needs.check-and-merge.result }}' === 'failure') {
+            failedJobs.push('Auto-merge');
+          }
+          if ('${{ needs.generate-pdf.result }}' === 'failure') {
+            failedJobs.push('PDF Generation');
+          }
+          
+          const body = `❌ Workflow failed in: ${failedJobs.join(', ')}\n\nPlease check the [workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.`;
+          
+          if (context.eventName === 'pull_request') {
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+          } else {
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: body
+            });
+          }
