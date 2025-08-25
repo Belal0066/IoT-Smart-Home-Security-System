@@ -128,14 +128,16 @@ This section details the design of the Smart Home Security System following the 
 % Specify the system's mapping to different IoT levels (e.g., Device, Network, Application).
 % Describe how these levels interact.
 The system architecture is structured across multiple IoT levels:
-\begin{enumerate}
-    \item \textbf{Level 1 (Device):} Physical devices including PIR motion sensors, magnetic door/window sensors, and cameras.
-    \item \textbf{Level 2 (Network):} Communication protocols for data transmission. Sensors may use low-power protocols like Zigbee or Z-Wave to communicate with the hub. The hub uses Wi-Fi to connect to the Internet.
-    \item \textbf{Level 3 (Services/Application):} The cloud platform that hosts the application logic, data storage, and the user-facing mobile application for alerts and system control.
-\end{enumerate}
+\begin{itemize}
+    \item \textbf{Level 1 (Perception/Device Layer):} This is the physical layer responsible for sensing the environment. It includes the door/window magnetic sensors, PIR motion sensors, and cameras that collect the raw data.
 
-% test ref 1
-\cite{trustmebro2025}
+    \item \textbf{Level 2 (Network/Gateway Layer):} This level is responsible for data aggregation and communication. Data from the sensors is transmitted via protocols like Wi-Fi or Zigbee to a central IoT hub or gateway, which then securely forwards it to the cloud platform.
+
+    \item \textbf{Level 3 (Service Management/Processing Layer):} This is the core of the system, typically hosted in the cloud. It is responsible for processing the incoming sensor data, executing the security logic (e.g., identifying an intrusion event), storing data, and managing the overall system services.
+
+    \item \textbf{Level 4 (Application/Presentation Layer):} This is the user-facing level. It includes the mobile application that allows the homeowner to receive real-time alerts, view the status of their home, watch live video feeds, and remotely arm or disarm the security system.
+\end{itemize}
+\end{enumerate}
 
 % --- STEP 7 ---
 \subsection{Step 7: Functional View Specification}
@@ -150,6 +152,9 @@ The system architecture is structured across multiple IoT levels:
 \subsection{Step 8: Operational View Specification}
 % --- Person 3 (BELAL) writes here ---
 % Outline operational aspects like performance, reliability, security, and scalability.
+
+% test ref 1
+\cite{trustmebro2025}
 
 % --- STEP 9 ---
 \subsection{Step 9: Device \& Component Integration}
