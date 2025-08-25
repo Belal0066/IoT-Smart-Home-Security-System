@@ -70,10 +70,21 @@ jobs:
       if: steps.merge-check.outputs.can_merge == 'true'
       uses: xu-cheng/latex-action@v3
       with:
-        root_file: ${{ env.MAIN_TEX_FILE }}
+        root_file: main.tex
+        working_directory: report
         args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
         extra_system_packages: "py-pygments"
         latexmk_use_xelatex: false
+    
+    - name: Debug - List files after PR compilation
+      if: steps.merge-check.outputs.can_merge == 'true'
+      run: |
+        echo "=== Files in root directory ==="
+        ls -la
+        echo "=== Files in report directory ==="
+        ls -la report/
+        echo "=== Looking for PDF files ==="
+        find . -name "*.pdf" -type f
     
     - name: Auto-merge PR
       if: steps.merge-check.outputs.can_merge == 'true'
@@ -108,10 +119,20 @@ jobs:
     - name: Compile LaTeX document
       uses: xu-cheng/latex-action@v3
       with:
-        root_file: ${{ env.MAIN_TEX_FILE }}
+        root_file: main.tex
+        working_directory: report
         args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
         extra_system_packages: "py-pygments"
         latexmk_use_xelatex: false
+    
+    - name: Debug - List files after compilation
+      run: |
+        echo "=== Files in root directory ==="
+        ls -la
+        echo "=== Files in report directory ==="
+        ls -la report/
+        echo "=== Looking for PDF files ==="
+        find . -name "*.pdf" -type f
     
     - name: Get current date and commit info
       id: date
