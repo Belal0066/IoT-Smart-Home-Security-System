@@ -127,6 +127,12 @@ This section details the design of the Smart Home Security System following the 
 % --- Person 3 (BELAL) writes here ---
 % Specify the system's mapping to different IoT levels (e.g., Device, Network, Application).
 % Describe how these levels interact.
+The system architecture is structured across multiple IoT levels:
+\begin{enumerate}
+    \item \textbf{Level 1 (Device):} Physical devices including PIR motion sensors, magnetic door/window sensors, and cameras.
+    \item \textbf{Level 2 (Network):} Communication protocols for data transmission. Sensors may use low-power protocols like Zigbee or Z-Wave to communicate with the hub. The hub uses Wi-Fi to connect to the internet.
+    \item \textbf{Level 3 (Services/Application):} The cloud platform that hosts the application logic, data storage, and the user-facing mobile application for alerts and system control.
+\end{enumerate}
 
 % test ref 1
 \cite{trustmebro2025}
