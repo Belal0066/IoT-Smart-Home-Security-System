@@ -85,16 +85,44 @@ This section details the design of the Smart Home Security System following the 
 
 % --- STEP 1 ---
 \subsection{Step 1: Purpose \& Requirements Specification}
-% --- Person 1 (SALMA) writes here ---
-% A. Purpose: Define the high-level goal of the system.
-% B. Functional Requirements: List the specific actions the system must perform.
-% C. Non-Functional Requirements: List the quality attributes (security, performance, etc.).
+The primary purpose of this IoT system is to enhance home security by providing real-time detection of unauthorized entry or suspicious activity and notifying homeowners immediately. This system aims to be a proactive deterrent and a reliable monitoring tool, offering peace of mind to the user by integrating physical sensors with a smart notification platform.
+\subsubsection{\textbf{Functional Requirements:}}
+\begin{itemize}
+    \item \textbf{Door/Window Monitoring:} The system must use magnetic sensors to detect when a door or window is opened and register this as a potential intrusion event.
+    \item \textbf{Motion Detection:} PIR motion sensors must be able to detect human movement within designated areas of the home.
+    \item \textbf{Camera Integration:} The system must be able to trigger a camera to capture images or video footage upon detecting a security event (e.g., a door opening or motion).
+    \item \textbf{Real-time Alerts:} The system must send immediate notifications (e.g., push notifications or SMS) to the homeowner's mobile application when an event is detected.
+    \item \textbf{Remote Control:} The homeowner must have the ability to arm or disarm the system and remotely control connected devices, such as activating a siren or turning on lights.
+    \item \textbf{Monitoring Dashboard:} The mobile application must provide a live view of all sensor statuses and a log of past events.
+\end{itemize}
+\subsubsection{Non-Functional Requirements:}
+\begin{itemize}
+    \item \textbf{High Reliability:} The system must be highly reliable with a low rate of false alarms to maintain user trust.
+    \item \textbf{Secure Communication:} All data transmission between sensors, the IoT hub, and the cloud must be encrypted to prevent eavesdropping or tampering.
+    \item \textbf{Scalability}: The system must be designed to easily accommodate additional sensors, cameras, and other devices as the user’s needs grow.
+    \item \textbf{Energy Efficiency:} Battery-powered sensors must have a long lifespan, minimizing the need for frequent battery replacement.
+    \item \textbf{Low Latency:} The time from event detection to notification delivery must be as short as possible, ideally less than two seconds.
+\end{itemize}
+
 
 % --- STEP 2 ---
 \subsection{Step 2: Process Specification}
 % --- Person 1 (SALMA) writes here ---
 % Describe the main processes of the system (e.g., intrusion detection, alerting).
 % You can add a flowchart figure here later.
+The core process of the system involves a continuous cycle of sensing, processing, and reacting. This process is initiated by a physical event and culminates in a user notification and, potentially, an automated action.
+\begin{itemize}
+    \item \textbf{Event Detection}: The process begins when a sensor is triggered. A magnetic sensor detects the state change from a closed door to an open door, or a PIR sensor detects a change in infrared radiation, indicating movement.
+    \item \textbf{Data Transmission:} The triggered sensor sends a wireless signal (e.g., via Zigbee or Wi-Fi) containing event data (e.g., "door\_sensor\_1: open") to the central IoT hub.
+    \item \textbf{Hub-side Processing:} The IoT hub receives the data and performs a preliminary check. If the system is armed, it determines that this event requires further action.
+    \item \textbf{Cloud Communication:} The hub forwards the event data to a cloud-based backend. This data is packaged as a lightweight message (e.g., JSON payload via MQTT).
+    \item \textbf{Cloud-side Analysis \& Action:} The cloud server performs several critical functions.
+    \item \textbf{Event Classification:} It analyzes the event data to confirm it's a valid intrusion alert.
+    \item \textbf{Notification Generation:} It generates a push notification or other form of alert, containing relevant details like the sensor ID and timestamp.
+    \item \textbf{Command Triggering:} It sends a command back to the IoT hub to trigger a connected actuator, such as activating a siren or a smart camera to start recording.
+    \item \textbf{User Notification:} The notification is delivered to the homeowner's mobile application.
+    \item \textbf{User Interaction:} The user can interact with the app to view the event log, review camera footage, or remotely disarm the system.
+\end{itemize}
 
 % --- STEP 3 ---
 \subsection{Step 3: Domain Model Specification}
@@ -109,6 +137,8 @@ This section details the design of the Smart Home Security System following the 
 % \caption{Domain Model UML Class Diagram for the Smart Home Security System.}
 % \label{fig:uml}
 % \end{figure}
+
+
 
 % --- STEP 4 ---
 \subsection{Step 4: Information Model Specification}
