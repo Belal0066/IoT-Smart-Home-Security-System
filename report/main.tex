@@ -53,11 +53,11 @@ Cairo, Egypt \\
 Cairo, Egypt \\
 2@eng.asu.edu.eg}
 \and
-\IEEEauthorblockN{Student Name 4}
+\IEEEauthorblockN{Adham Osama Mohamed Nour}
 \IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
 \textit{Ain Shams University}\\
 Cairo, Egypt \\
-2@eng.asu.edu.eg}
+22p0071@eng.asu.edu.eg}
 \and
 \IEEEauthorblockN{Belal Anas Awad}
 \IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
@@ -196,9 +196,117 @@ The system architecture is structured across multiple IoT levels:
 
 % --- STEP 9 ---
 \subsection{Step 9: Device \& Component Integration}
-% --- Person 4 (ADHAM) writes here ---
-% A. Detail the specific hardware (sensors, actuators, hub) to be used or simulated.
-% B. Explain how they will be interconnected and communicate (e.g., protocols like Wi-Fi, MQTT).
+The Smart Home Security System integrates a range of IoT hardware components, each chosen for its reliability, cost-effectiveness, and compatibility with standard IoT protocols. Table~\ref{tab:devices-wide} summarizes the devices and their functions.
+
+% preamble once:
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\begin{table*}[t]
+\centering
+\caption{Devices and Components Integration}
+\label{tab:devices-wide}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{l Y l l}
+\toprule
+\textbf{Device/Component} & \textbf{Function} & \textbf{Protocol} & \textbf{Example Model} \\
+\midrule
+Door/Window sensor & Detects door/window state transitions (open/close) & Zigbee / Wi-Fi & Aqara Contact \\
+PIR motion sensor  & Detects human motion via IR changes                 & Zigbee / Wi-Fi & HC-SR501 \\
+IP camera          & Streams live video / captures snapshots             & RTSP / Wi-Fi   & ESP32-CAM \\
+Siren/Buzzer       & Audible alarm on intrusion                          & GPIO / Zigbee  & Smart Siren Gen5 \\
+Smart light        & Illumination deterrent / visual alarm               & Zigbee / Wi-Fi & Philips Hue \\
+IoT hub/gateway    & Local aggregation, MQTT client, edge rules          & MQTT / Wi-Fi   & Raspberry Pi 4 \\
+Router             & LAN/WAN connectivity                                & Ethernet/Wi-Fi & Cisco 2900 \\
+Cloud backend      & Broker, rule engine, storage, notifications         & MQTT / HTTPS   & AWS IoT Core \\
+Mobile app         & Status, control, alerts, video                      & HTTPS / MQTT   & Flutter app \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+
+
+\subsubsection{Integration Architecture}
+The integration follows a layered approach:
+\begin{itemize}
+    \item \textbf{Sensors and Actuators:} Door/window sensors and PIR motion sensors generate real-time status events. Actuators (sirens and lights) receive commands triggered by intrusion events.
+    \item \textbf{IoT Hub/Gateway:} A Raspberry Pi acts as the local IoT hub, receiving sensor signals via Zigbee or Wi-Fi. It formats data into lightweight JSON packets and communicates using MQTT.
+    \item \textbf{Network Infrastructure:} The hub connects to a Wi-Fi router, ensuring secure internet access for forwarding data to the cloud.
+    \item \textbf{Cloud Services:} A cloud backend (e.g., AWS IoT Core) processes events, manages device states, and stores logs and camera feeds.
+    \item \textbf{Mobile Application:} The app subscribes to MQTT topics and REST APIs to display alerts, logs, and live video streams to the user.
+\end{itemize}
+
+\subsubsection{Communication Flow}
+\begin{enumerate}
+    \item Sensors detect an event and transmit data to the IoT hub (via Zigbee/Wi-Fi).
+    \item The hub authenticates and forwards the event to the cloud service using MQTT over TLS.
+    \item The cloud backend triggers a rule engine: it logs the event, sends push notifications, and issues commands to actuators.
+    \item Actuators (sirens, lights, cameras) respond immediately to the commands.
+    \item The mobile app receives real-time alerts and allows remote control.
+\end{enumerate}
+
+
+\begin{figure}[h]
+  \centering
+  \resizebox{\columnwidth}{!}{%
+  \begin{tikzpicture}[
+    node distance=1.2cm and 1.6cm,
+    box/.style={rounded corners, draw=ink, very thick, fill=white, blur shadow,
+                minimum width=3.4cm, minimum height=1.0cm, align=center},
+    small/.style={rounded corners, draw=ink, thick, fill=white, blur shadow,
+                  minimum width=2.6cm, minimum height=0.8cm, align=center, font=\footnotesize},
+    line/.style={-{Latex[length=3mm,width=2mm]}, very thick, draw=primary},
+    cmd/.style={-{Latex[length=3mm,width=2mm]}, very thick, draw=accent, dashed},
+    label/.style={font=\scriptsize, midway, fill=white, inner sep=1pt}
+  ]
+
+  %%%%%%%%%%%%% Top: Sensors %%%%%%%%%%%%%
+  \node[small] (door) {Door/Window\\Sensor};
+  \node[small, right=of door] (pir) {PIR Motion\\Sensor};
+  \node[small, right=of pir] (cam) {IP Camera\\(RTSP)};
+
+  %%%%%%%%%%%%% Middle-left: Hub & LAN %%%%%%%%%%%%%
+  \node[box, below=1.4cm of pir, fill=primary!8] (hub) {\textbf{IoT Hub/Gateway}\\(Raspberry Pi, MQTT Client)};
+  \node[box, right=2.1cm of hub] (router) {Home Router\\(Wi-Fi/Ethernet)};
+
+  %%%%%%%%%%%%% Cloud %%%%%%%%%%%%%
+  \node[box, right=2.2cm of router, fill=primary!8] (cloud) {\textbf{Cloud Backend}\\MQTT Broker \,|\, Rule Engine \,|\, Storage};
+
+  %%%%%%%%%%%%% Bottom: App & Actuators %%%%%%%%%%%%%
+  \node[small, below=1.7cm of cloud] (app) {Mobile App\\(Flutter)};
+  \node[small, below=1.7cm of hub] (siren) {Siren/Buzzer};
+  \node[small, right=of siren] (light) {Smart Light};
+
+  %%%%%%%%%%%%% Connections: Sensors -> Hub %%%%%%%%%%%%%
+  \draw[line] (door) -- (hub) node[label, above] {Zigbee / Wi-Fi};
+  \draw[line] (pir) -- (hub) node[label, above] {Zigbee / Wi-Fi};
+  \draw[line] (cam) |- (hub) node[label, above] {RTSP over LAN};
+
+  %%%%%%%%%%%%% Hub -> Router -> Cloud %%%%%%%%%%%%%
+  \draw[line] (hub) -- (router) node[label, above] {LAN};
+  \draw[line] (router) -- (cloud) node[label, above] {MQTT over TLS / HTTPS};
+
+  %%%%%%%%%%%%% Cloud -> App (alerts, control) %%%%%%%%%%%%%
+  \draw[line] (cloud) -- (app) node[label, right] {Push / HTTPS / MQTT};
+
+  %%%%%%%%%%%%% Commands back: Cloud -> Hub -> Actuators %%%%%%%%%%%%%
+  \draw[cmd] (cloud.west) to[bend left=20] node[label, above] {Command (MQTT)} (hub.east);
+  \draw[cmd] (hub) -- (siren) node[label, above] {GPIO / Zigbee};
+  \draw[cmd] (hub) -- (light) node[label, above] {Zigbee / Wi-Fi};
+
+  %%%%%%%%%%%%% Legend %%%%%%%%%%%%%
+  \node[draw=none, below=0.9cm of light, align=left, font=\scriptsize] (legend) {%
+    \textcolor{primary}{\rule{14pt}{2.4pt}}~Data/Telemetry \quad
+    \textcolor{accent}{\rule{14pt}{2.4pt}}~Commands/Actuation (dashed)
+  };
+
+  \end{tikzpicture}%
+  }
+  \caption{Device \& Component Integration: sensors stream telemetry to the IoT hub, which relays securely to the cloud; alerts flow to the mobile app, while commands return to local actuators.}
+  \label{fig:device_integration_tikz}
+
+\end{figure}
+
 
 % --- STEP 10 ---
 \subsection{Step 10: Application Development}
@@ -323,3 +431,4 @@ The authors wish to thank the teaching staff of the Computer and Systems Enginee
 \bibliography{references}
 
 \end{document}
+
