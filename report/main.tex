@@ -193,9 +193,102 @@ The system architecture is structured across multiple IoT levels:
 
 % --- STEP 10 ---
 \subsection{Step 10: Application Development}
-% --- Person 5 (HAMSA) writes here ---
-% A. Describe the user-facing application (e.g., a mobile app).
-% B. Include user interface mockups and describe functionality (dashboard, notifications, etc.).
+
+\subsubsection{Application Overview}
+The mobile application provides homeowners with real-time visibility and control over their smart home security system. Core capabilities include device status monitoring, remote control, event notifications, and \textbf{camera integration} for live view and recorded evidence.
+
+\subsubsection{User Interface (UI)}
+The app follows a modern, accessible design (dark/light themes). Primary navigation uses a bottom tab bar: \emph{Home}, \emph{Devices}, \emph{Cameras}, and \emph{Alerts}.
+
+\subsubsection{Main Pages}
+\begin{itemize}
+  \item \textbf{Home:} System status (Armed/Disarmed), quick actions, and high-level tiles (Door/Window, Motion, Cameras).
+  \item \textbf{Door/Window Monitoring:} List of entries with current state (\emph{Open}/\emph{Closed}), and a \emph{View Camera} button for associated zones.
+  \item \textbf{Motion Detection:} Zones (e.g., Living Room, Hallway) with \emph{No Motion}/\emph{Motion} state and \emph{View Camera}.
+  %\item \textbf{Cameras:} Grid of cameras with \emph{Live} view and \emph{Recordings}. Each camera supports start/stop record and snapshot.
+  \item \textbf{Alerts:} Feed of events (icons, time, location) with inline thumbnails and \emph{View Footage}.
+\end{itemize}
+
+\subsubsection{UI Flow (Conceptual)}
+.
+\begin{figure}[h]
+  \centering
+  \resizebox{\columnwidth}{!}{%
+  \begin{tikzpicture}[
+    node distance=1.6cm and 2.2cm,
+    box/.style={rounded corners, draw=ink, very thick, fill=white, blur shadow, minimum width=3.5cm, minimum height=1.1cm, align=center},
+    arr/.style={-{Latex[length=3mm,width=2mm]}, very thick, draw=primary}
+  ]
+
+  \node[box, fill=primary!8] (home) {\textbf{Home}\\Status \& Quick Actions};
+  \node[box, right=of home] (dw) {Door/Window\\Monitoring};
+  \node[box, below=of dw] (motion) {Motion\\Detection};
+  \node[box, right=of dw, fill=primary!8] (alerts) {\textbf{Alerts}\\Events \& Clips};
+  \node[box, below=of alerts] (cameras) {Cameras\\Live \& Recordings};
+
+  \draw[arr] (home) -- node[above]{\small Door/Window button} (dw);
+  \draw[arr] (home) |- node[pos=0.25, left]{\small Motion button} (motion);
+  \draw[arr] (home) |- node[pos=0.25, above]{\small Cameras tab} (cameras);
+  \draw[arr] (dw) -- node[above]{\small View Camera} (cameras);
+  \draw[arr] (motion) -| node[pos=0.25, below]{\small View Camera} (cameras);
+  \draw[arr, dashed, draw=accent] (dw) -- node[above]{\small Event created} (alerts);
+  \draw[arr, dashed, draw=accent] (motion) -- node[right]{\small Event created} (alerts);
+  \draw[arr] (alerts) -- node[below]{\small View Footage} (cameras);
+
+  % Legend
+  \node[below=0.8cm of motion, align=left] (legend) {\footnotesize
+    \textcolor{primary}{\rule{10pt}{2pt}}~Navigation \quad
+    \textcolor{accent}{\rule{10pt}{2pt}}~Auto event flow (camera trigger $\rightarrow$ alert)
+  };
+  \end{tikzpicture}%
+  }
+
+  \caption{Navigation and event-driven flow including camera auto-trigger.}
+\end{figure}
+
+%\subsubsection{Technical Implementation}
+\subsubsection{Platforms}
+Cross-platform mobile app using \textbf{Flutter}.
+
+\subsubsection{Communication}
+\begin{itemize}
+  \item \textbf{MQTT:} Low-latency sensor updates (\texttt{/home/zone1/door}, \texttt{/home/livingroom/motion}).
+  \item \textbf{HTTPS REST API:} Event log queries, user actions, and recording retrieval.
+  \item \textbf{WebRTC/RTSP:} Live video; recordings stored in cloud object storage.
+\end{itemize}
+
+\subsubsection{Backend}
+Cloud microservices handle device registry, auth, and event processing. All traffic is encrypted (TLS 1.2+).
+
+\subsubsection{Security}
+\begin{itemize}
+  \item \textbf{Authentication:} OAuth~2.0 with optional two-factor.
+  \item \textbf{Authorization:} Role-based access (Owner, Family, Guest).
+  \item \textbf{Privacy:} Encrypted video at rest; signed URLs for clip access; automatic redaction options.
+\end{itemize}
+
+\subsubsection{Figures}
+App Mockup
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{hi.png}
+  \caption{Smart Home Security app mockups showing Home, Door/Window, Motion, and Alerts with camera thumbnails.}
+\end{figure}
+
+\subsubsection{Traceability (Features to Screens)}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\textbf{Requirement} & \textbf{UI Location} \\\midrule
+Door/Window Monitoring & Home tile; Door/Window page (\emph{View Camera}) \\
+Motion Detection & Home tile; Motion page (\emph{View Camera}) \\
+Camera Integration & Cameras page; Alerts thumbnails; auto-trigger from events \\
+Real-time Alerts & Alerts feed; push notifications \\
+Remote Control & Home quick actions; Devices page (Siren/Lights) \\
+Monitoring Dashboard & Home overview; Events log on Alerts \\
+\bottomrule
+\end{tabularx}
+\end{center}
 
 
 \section{Conclusion}
