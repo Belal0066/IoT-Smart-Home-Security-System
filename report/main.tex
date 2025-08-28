@@ -8,16 +8,25 @@
 \IEEEoverridecommandlockouts
 % The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
 \usepackage{cite}
+\usepackage{booktabs}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
+\usepackage{tabularx}
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
 % Set the path for your figures directory
 \graphicspath{{figures/}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shadows.blur}
+
+\definecolor{primary}{HTML}{0A84FF}
+\definecolor{accent}{HTML}{FF453A}
+\definecolor{ink}{HTML}{0A0A0A}
 
 \begin{document}
 
@@ -26,11 +35,11 @@
 }
 
 % --- TEAM'S NAMES ---
-\author{\IEEEauthorblockN{Student Name 1}
+\author{\IEEEauthorblockN{Hamsa Ahmad}
 \IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
 \textit{Ain Shams University}\\
 Cairo, Egypt \\
-2@eng.asu.edu.eg}
+20P1874@eng.asu.edu.eg}
 \and
 \IEEEauthorblockN{Student Name 2}
 \IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
@@ -85,16 +94,44 @@ This section details the design of the Smart Home Security System following the 
 
 % --- STEP 1 ---
 \subsection{Step 1: Purpose \& Requirements Specification}
-% --- Person 1 (SALMA) writes here ---
-% A. Purpose: Define the high-level goal of the system.
-% B. Functional Requirements: List the specific actions the system must perform.
-% C. Non-Functional Requirements: List the quality attributes (security, performance, etc.).
+The primary purpose of this IoT system is to enhance home security by providing real-time detection of unauthorized entry or suspicious activity and notifying homeowners immediately. This system aims to be a proactive deterrent and a reliable monitoring tool, offering peace of mind to the user by integrating physical sensors with a smart notification platform.
+\subsubsection{\textbf{Functional Requirements:}}
+\begin{itemize}
+    \item \textbf{Door/Window Monitoring:} The system must use magnetic sensors to detect when a door or window is opened and register this as a potential intrusion event.
+    \item \textbf{Motion Detection:} PIR motion sensors must be able to detect human movement within designated areas of the home.
+    \item \textbf{Camera Integration:} The system must be able to trigger a camera to capture images or video footage upon detecting a security event (e.g., a door opening or motion).
+    \item \textbf{Real-time Alerts:} The system must send immediate notifications (e.g., push notifications or SMS) to the homeowner's mobile application when an event is detected.
+    \item \textbf{Remote Control:} The homeowner must have the ability to arm or disarm the system and remotely control connected devices, such as activating a siren or turning on lights.
+    \item \textbf{Monitoring Dashboard:} The mobile application must provide a live view of all sensor statuses and a log of past events.
+\end{itemize}
+\subsubsection{Non-Functional Requirements:}
+\begin{itemize}
+    \item \textbf{High Reliability:} The system must be highly reliable with a low rate of false alarms to maintain user trust.
+    \item \textbf{Secure Communication:} All data transmission between sensors, the IoT hub, and the cloud must be encrypted to prevent eavesdropping or tampering.
+    \item \textbf{Scalability}: The system must be designed to easily accommodate additional sensors, cameras, and other devices as the user’s needs grow.
+    \item \textbf{Energy Efficiency:} Battery-powered sensors must have a long lifespan, minimizing the need for frequent battery replacement.
+    \item \textbf{Low Latency:} The time from event detection to notification delivery must be as short as possible, ideally less than two seconds.
+\end{itemize}
+
 
 % --- STEP 2 ---
 \subsection{Step 2: Process Specification}
 % --- Person 1 (SALMA) writes here ---
 % Describe the main processes of the system (e.g., intrusion detection, alerting).
 % You can add a flowchart figure here later.
+The core process of the system involves a continuous cycle of sensing, processing, and reacting. This process is initiated by a physical event and culminates in a user notification and, potentially, an automated action.
+\begin{itemize}
+    \item \textbf{Event Detection}: The process begins when a sensor is triggered. A magnetic sensor detects the state change from a closed door to an open door, or a PIR sensor detects a change in infrared radiation, indicating movement.
+    \item \textbf{Data Transmission:} The triggered sensor sends a wireless signal (e.g., via Zigbee or Wi-Fi) containing event data (e.g., "door\_sensor\_1: open") to the central IoT hub.
+    \item \textbf{Hub-side Processing:} The IoT hub receives the data and performs a preliminary check. If the system is armed, it determines that this event requires further action.
+    \item \textbf{Cloud Communication:} The hub forwards the event data to a cloud-based backend. This data is packaged as a lightweight message (e.g., JSON payload via MQTT).
+    \item \textbf{Cloud-side Analysis \& Action:} The cloud server performs several critical functions.
+    \item \textbf{Event Classification:} It analyzes the event data to confirm it's a valid intrusion alert.
+    \item \textbf{Notification Generation:} It generates a push notification or other form of alert, containing relevant details like the sensor ID and timestamp.
+    \item \textbf{Command Triggering:} It sends a command back to the IoT hub to trigger a connected actuator, such as activating a siren or a smart camera to start recording.
+    \item \textbf{User Notification:} The notification is delivered to the homeowner's mobile application.
+    \item \textbf{User Interaction:} The user can interact with the app to view the event log, review camera footage, or remotely disarm the system.
+\end{itemize}
 
 % --- STEP 3 ---
 \subsection{Step 3: Domain Model Specification}
@@ -109,6 +146,8 @@ This section details the design of the Smart Home Security System following the 
 % \caption{Domain Model UML Class Diagram for the Smart Home Security System.}
 % \label{fig:uml}
 % \end{figure}
+
+
 
 % --- STEP 4 ---
 \subsection{Step 4: Information Model Specification}
@@ -163,6 +202,103 @@ The system architecture is structured across multiple IoT levels:
 
 % --- STEP 10 ---
 \subsection{Step 10: Application Development}
+
+\subsubsection{Application Overview}
+The mobile application provides homeowners with real-time visibility and control over their smart home security system. Core capabilities include device status monitoring, remote control, event notifications, and \textbf{camera integration} for live view and recorded evidence.
+
+\subsubsection{User Interface (UI)}
+The app follows a modern, accessible design (dark/light themes). Primary navigation uses a bottom tab bar: \emph{Home}, \emph{Devices}, \emph{Cameras}, and \emph{Alerts}.
+
+\subsubsection{Main Pages}
+\begin{itemize}
+  \item \textbf{Home:} System status (Armed/Disarmed), quick actions, and high-level tiles (Door/Window, Motion, Cameras).
+  \item \textbf{Door/Window Monitoring:} List of entries with current state (\emph{Open}/\emph{Closed}), and a \emph{View Camera} button for associated zones.
+  \item \textbf{Motion Detection:} Zones (e.g., Living Room, Hallway) with \emph{No Motion}/\emph{Motion} state and \emph{View Camera}.
+  %\item \textbf{Cameras:} Grid of cameras with \emph{Live} view and \emph{Recordings}. Each camera supports start/stop record and snapshot.
+  \item \textbf{Alerts:} Feed of events (icons, time, location) with inline thumbnails and \emph{View Footage}.
+\end{itemize}
+
+\subsubsection{UI Flow (Conceptual)}
+.
+\begin{figure}[h]
+  \centering
+  \resizebox{\columnwidth}{!}{%
+  \begin{tikzpicture}[
+    node distance=1.6cm and 2.2cm,
+    box/.style={rounded corners, draw=ink, very thick, fill=white, blur shadow, minimum width=3.5cm, minimum height=1.1cm, align=center},
+    arr/.style={-{Latex[length=3mm,width=2mm]}, very thick, draw=primary}
+  ]
+
+  \node[box, fill=primary!8] (home) {\textbf{Home}\\Status \& Quick Actions};
+  \node[box, right=of home] (dw) {Door/Window\\Monitoring};
+  \node[box, below=of dw] (motion) {Motion\\Detection};
+  \node[box, right=of dw, fill=primary!8] (alerts) {\textbf{Alerts}\\Events \& Clips};
+  \node[box, below=of alerts] (cameras) {Cameras\\Live \& Recordings};
+
+  \draw[arr] (home) -- node[above]{\small Door/Window button} (dw);
+  \draw[arr] (home) |- node[pos=0.25, left]{\small Motion button} (motion);
+  \draw[arr] (home) |- node[pos=0.25, above]{\small Cameras tab} (cameras);
+  \draw[arr] (dw) -- node[above]{\small View Camera} (cameras);
+  \draw[arr] (motion) -| node[pos=0.25, below]{\small View Camera} (cameras);
+  \draw[arr, dashed, draw=accent] (dw) -- node[above]{\small Event created} (alerts);
+  \draw[arr, dashed, draw=accent] (motion) -- node[right]{\small Event created} (alerts);
+  \draw[arr] (alerts) -- node[below]{\small View Footage} (cameras);
+
+  % Legend
+  \node[below=0.8cm of motion, align=left] (legend) {\footnotesize
+    \textcolor{primary}{\rule{10pt}{2pt}}~Navigation \quad
+    \textcolor{accent}{\rule{10pt}{2pt}}~Auto event flow (camera trigger $\rightarrow$ alert)
+  };
+  \end{tikzpicture}%
+  }
+
+  \caption{Navigation and event-driven flow including camera auto-trigger.}
+\end{figure}
+
+%\subsubsection{Technical Implementation}
+\subsubsection{Platforms}
+Cross-platform mobile app using \textbf{Flutter}.
+
+\subsubsection{Communication}
+\begin{itemize}
+  \item \textbf{MQTT:} Low-latency sensor updates (\texttt{/home/zone1/door}, \texttt{/home/livingroom/motion}).
+  \item \textbf{HTTPS REST API:} Event log queries, user actions, and recording retrieval.
+  \item \textbf{WebRTC/RTSP:} Live video; recordings stored in cloud object storage.
+\end{itemize}
+
+\subsubsection{Backend}
+Cloud microservices handle device registry, auth, and event processing. All traffic is encrypted (TLS 1.2+).
+
+\subsubsection{Security}
+\begin{itemize}
+  \item \textbf{Authentication:} OAuth~2.0 with optional two-factor.
+  \item \textbf{Authorization:} Role-based access (Owner, Family, Guest).
+  \item \textbf{Privacy:} Encrypted video at rest; signed URLs for clip access; automatic redaction options.
+\end{itemize}
+
+\subsubsection{Figures}
+App Mockup
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{AppMockup.png}
+  \caption{Smart Home Security app mockups showing Home, Door/Window, Motion, and Alerts with camera thumbnails.}
+\end{figure}
+
+\subsubsection{Traceability (Features to Screens)}
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+\textbf{Requirement} & \textbf{UI Location} \\\midrule
+Door/Window Monitoring & Home tile; Door/Window page (\emph{View Camera}) \\
+Motion Detection & Home tile; Motion page (\emph{View Camera}) \\
+Camera Integration & Cameras page; Alerts thumbnails; auto-trigger from events \\
+Real-time Alerts & Alerts feed; push notifications \\
+Remote Control & Home quick actions; Devices page (Siren/Lights) \\
+Monitoring Dashboard & Home overview; Events log on Alerts \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
 % --- Person 5 (HAMSA) writes here ---
 % A. Describe the user-facing application (e.g., a mobile app).
 % B. Include user interface mockups and describe functionality (dashboard, notifications, etc.).
