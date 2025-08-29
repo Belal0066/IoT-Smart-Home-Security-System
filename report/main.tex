@@ -7,7 +7,7 @@
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
 % The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
-\usepackage{cite}
+% \usepackage{cite}
 \usepackage{booktabs}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
@@ -16,6 +16,9 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{tabularx}
+\usepackage{float}
+\usepackage{placeins}
+
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 
@@ -23,6 +26,7 @@
 \graphicspath{{figures/}}
 
 \usepackage{tikz}
+\usetikzlibrary{fit}
 \usetikzlibrary{arrows.meta,positioning,shadows.blur}
 
 \definecolor{primary}{HTML}{0A84FF}
@@ -48,11 +52,11 @@ Cairo, Egypt \\
 Cairo, Egypt \\
 2101077@eng.asu.edu.eg}
 \and
-\IEEEauthorblockN{Student Name 3}
+\IEEEauthorblockN{Salma Mohamed Yousef}
 \IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
 \textit{Ain Shams University}\\
 Cairo, Egypt \\
-2@eng.asu.edu.eg}
+21P0148@eng.asu.edu.eg}
 \and
 \IEEEauthorblockN{Adham Osama Mohamed Nour}
 \IEEEauthorblockA{\textit{Computer and Systems Eng. Dept.} \\
@@ -240,15 +244,76 @@ The system’s data pipeline follows a structured flow:
 \subsubsection{Information Model Diagram}
 
 \begin{center}
-\includegraphics[width=\columnwidth]{information_model.png}
+% \includegraphics[width=\columnwidth]{information_model.png}
+\centerline{\includegraphics[width=0.9\columnwidth]{information_model.png}}
+
+
 \captionof{figure}{Information model showing sensor data flow (binary, boolean, media) through the IoT Hub and Cloud Backend to the Mobile App, with dashed arrows for user and actuator commands.}
 \label{fig:information-model}
 \end{center}
+
 % --- STEP 5 ---
 \subsection{Step 5: Service Specifications}
-% --- Person 2 (AHMED) writes here ---
-% A. Define the services the system will offer (e.g., Monitoring Service, Alert Service).
-% B. Describe the interfaces and operations for each service.
+The service specifications define the logical services offered by the IoT system. These services represent the core functionalities and are exposed through well-defined interfaces (e.g., REST APIs, MQTT topics) that allow different components of the system to interact. These services are primarily hosted and executed within the cloud backend (Level 3).
+
+\subsubsection{Intrusion Detection Service}
+This is the central logic service responsible for analyzing incoming events and determining if a security threat exists.
+\begin{itemize}
+    \item \textbf{Description:} It consumes sensor data, correlates it with the system's current state (e.g., Armed/Disarmed), and applies predefined security rules to identify potential intrusions.
+    \item \textbf{Interface:} Consumes messages from an MQTT topic.
+    \item \textbf{Operations:}
+    \begin{itemize}
+        \item \texttt{ProcessSensorEvent}: Triggered when a new message arrives on the \texttt{/home/events/raw} topic. It takes a JSON payload from a sensor as input, evaluates it, and triggers other services (Notification, Event History) upon detecting a valid intrusion.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Notification Service}
+This service is dedicated to delivering real-time alerts to the homeowner.
+\begin{itemize}
+    \item \textbf{Description:} It formats and dispatches notifications through various channels based on user preferences.
+    \item \textbf{Interface:} Internal service-to-service API, invoked by the Intrusion Detection Service.
+    \item \textbf{Operations:}
+    \begin{itemize}
+        \item \texttt{SendAlert(UserID, EventData)}: Takes a target user and event details as input. It then pushes a formatted message to the appropriate platform notification service (e.g., Apple Push Notification Service, Firebase Cloud Messaging).
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Event History Service}
+This service provides data persistence for all security-related events, enabling historical review.
+\begin{itemize}
+    \item \textbf{Description:} It logs all events detected by the system and provides an interface for the mobile application to query this history.
+    \item \textbf{Interface:} Internal event logging and a public RESTful API for data retrieval.
+    \item \textbf{Operations:}
+    \begin{itemize}
+        \item \texttt{LogEvent(EventData)}: An internal operation triggered by the Intrusion Detection Service to write an event to the database.
+        \item \texttt{GET /api/events}: A REST API endpoint for the mobile app to fetch a list of historical events. It supports query parameters for filtering (e.g., \texttt{?zone=living\_room}, \texttt{?limit=20}). Returns a JSON array of event objects.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{User \& Control Service}
+This service manages user interactions and commands, allowing remote control over the system.
+\begin{itemize}
+    \item \textbf{Description:} It handles user requests to change the system's state (arm/disarm) and control individual actuators. It also manages user authentication and authorization.
+    \item \textbf{Interface:} RESTful API for the mobile application.
+    \item \textbf{Operations:}
+    \begin{itemize}
+        \item \texttt{POST /api/system/state}: Allows the user to change the system state. The request body contains the new state (e.g., \texttt{\{"state": "armed\_away"\}}). This service then publishes a command to an internal MQTT topic for actuators.
+        \item \texttt{GET /api/devices/status}: Provides the mobile app with the current status of all connected sensors and devices.
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Video Management Service}
+This service handles all functionalities related to the IP cameras, including live streaming and recording retrieval.
+\begin{itemize}
+    \item \textbf{Description:} Manages the lifecycle of video data, from triggering a recording to providing secure access for playback.
+    \item \textbf{Interface:} RESTful API for the mobile application.
+    \item \textbf{Operations:}
+    \begin{itemize}
+        \item \texttt{TriggerRecording(CameraID, EventID)}: An internal operation called by the Intrusion Detection Service to command a specific camera to start recording and associate the footage with an event.
+        \item \texttt{GET /api/cameras/\{id\}/live}: Provides a secure URL (e.g., WebRTC or RTSP) for the mobile app to initiate a live video stream from a specified camera.
+        \item \texttt{GET /api/recordings/\{event\_id\}}: Allows the mobile app to retrieve a recorded video clip associated with a specific security event. Returns a secure, time-limited URL to the video file stored in cloud storage.
+    \end{itemize}
+\end{itemize}
 
 % --- STEP 6 ---
 \subsection{Step 6: IoT Level Specification}
@@ -268,20 +333,156 @@ The system architecture is structured across multiple IoT levels:
 
 % --- STEP 7 ---
 \subsection{Step 7: Functional View Specification}
-% --- Person 3 (BELAL) writes here ---
-% A. Detail the functional blocks of the system (e.g., Device Management, Data Processing).
-% B. Describe the interactions between these blocks.
+The functional view specifies the system's high-level functional blocks and their interactions, abstracting away the specific implementation details. This view organizes the system into logical components based on their role in achieving the overall functionality.
 
-% test ref 1
-\cite{idkfactchecking2025}
+\subsubsection{Functional Blocks}
+The Smart Home Security System is decomposed into the following key functional blocks:
+
+\begin{itemize}
+    \item \textbf{Device Management:} This block is responsible for the management and abstraction of all physical devices. It handles the low-level details of interfacing with sensors (PIR, magnetic contact) and actuators (siren, smart lights, camera). Its functions include device registration, status monitoring (e.g., battery level), and command execution (e.g., trigger camera recording).
+
+    \item \textbf{Communication:} This block manages the secure and reliable exchange of data between all other blocks. It handles multiple communication protocols, including device-to-hub (Zigbee/Wi-Fi), hub-to-cloud (MQTT over TLS), and cloud-to-application (Push Notifications, HTTPS REST APIs). It is responsible for data serialization (JSON), encryption, and session management.
+
+    \item \textbf{Event Processing \& Rule Engine:} This is the analytical core of the system, residing primarily in the cloud backend. It receives event data from the Communication block, evaluates it against a set of predefined rules (e.g., "IF motion detected AND system is armed THEN trigger alarm"), and makes decisions. Its responsibilities include event filtering, correlation, and triggering subsequent actions.
+
+    \item \textbf{Data Storage Management:} This block handles the persistence of all system data. It is responsible for managing both structured data, such as event logs and device states in a time-series or relational database, and unstructured data, such as video clips and images in a secure cloud object storage service.
+
+    \item \textbf{Application \& Presentation:} This is the user-facing block that provides interfaces for monitoring and control. It encompasses the mobile application UI, which presents data in a human-readable format (dashboards, event timelines, live video streams) and translates user actions (e.g., pressing "disarm") into commands that are sent back through the system.
+
+    \item \textbf{Security \& Access Control:} This is a cross-cutting functional block that ensures the integrity, confidentiality, and availability of the system. It manages user authentication (login), authorization (role-based access for homeowner vs. guest), and enforces encryption policies for data in transit and at rest.
+\end{itemize}
+
+\subsubsection{Interaction of Functional Blocks}
+The functional blocks interact in a well-defined sequence to handle a security event. Figure 3 illustrates this flow, which is described below:
+\begin{figure}[htbp]
+\centering
+\resizebox{0.98\columnwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=2cm and 1.8cm,
+    block/.style={
+        rectangle, 
+        draw, 
+        fill=blue!10, 
+        text width=8em, 
+        text centered, 
+        rounded corners, 
+        minimum height=3.5em,
+        font=\small
+    },
+    cloud/.style={
+        rectangle,
+        draw,
+        dashed,
+        inner sep=0.7cm,
+        rounded corners
+    },
+    arrow/.style={-Latex, thick},
+    label/.style={font=\tiny, text centered}
+]
+
+% Main nodes
+\node[block] (device) {Device\\Management};
+\node[block, right=of device] (comm) {Communication};
+\node[block, right=of comm] (processing) {Event Processing\\{\&} Rule Engine};
+\node[block, right=of processing] (app) {Application {\&}\\Presentation};
+
+% Cloud components
+\node[block, above=1.5cm of processing] (security) {Security {\&}\\Access Control};
+\node[block, below=1.5cm of processing] (storage) {Data Storage};
+
+% Cloud boundary
+\node[cloud, fit=(processing) (storage) (security), 
+      label={[yshift=0.3cm, font=\normalsize]above:Cloud Backend}] (cloud_boundary) {};
+
+% Main data flow arrows
+\draw[arrow] (device) -- node[above, label] {Sensor Data} (comm);
+\draw[arrow] (comm) -- node[above, label] {MQTT Event} (processing);
+\draw[arrow] (processing) -- node[above, label] {Alert} (app);
+
+% Return path
+\draw[arrow] (app) to[out=270, in=0] node[below, label, pos=0.3] {User Command} +(-1.5,-1) to[out=180, in=270] (processing);
+\draw[arrow] (processing) to[out=270, in=0] node[below, label, pos=0.7] {Actuator Cmd} +(-1.5,-1) to[out=180, in=270] (comm);
+\draw[arrow] (comm) -- node[below, label] {Trigger} (device);
+
+% Storage interactions
+\draw[arrow] (processing) -- node[left, label] {Log Event} (storage);
+\draw[arrow] (storage) -- node[right, label] {Query Log} (processing);
+
+% Security interactions
+\draw[arrow, dashed] (security) -- (processing);
+\draw[arrow, dashed] (security) to[out=0, in=90] (app);
+\draw[arrow, dashed] (security) to[out=180, in=90] (comm);
+
+\end{tikzpicture}
+}
+\caption{Functional view block diagram showing interactions.}
+\label{fig:functional_view}
+\end{figure}
+
+A typical intrusion scenario unfolds as follows:
+\begin{enumerate}
+    \item A sensor (e.g., PIR motion sensor) detects an event. The \textbf{Device Management} block captures this raw signal.
+    \item The signal is passed to the \textbf{Communication} block, which formats it into a JSON payload and transmits it securely via MQTT to the cloud.
+    \item The \textbf{Event Processing \& Rule Engine} receives the message. The \textbf{Security \& Access Control} block first validates the device's credentials.
+    \item The Rule Engine processes the event. It checks the system's state (e.g., "Armed") and decides the event is a valid intrusion.
+    \item It issues two commands: first, it instructs the \textbf{Data Storage Management} block to log the event details (sensor ID, timestamp, etc.).
+    \item Second, it generates an alert payload and sends it to the \textbf{Application \& Presentation} block via the Communication block's push notification service.
+    \item The user receives the alert on their mobile app. They can use the app to send a command back (e.g., "activate siren"). This command flows from the Application block, through Processing, Communication, and finally to the actuator in the Device Management block.
+\end{enumerate}
+This decoupled architecture ensures that each block can be developed, tested, and scaled independently, creating a robust and maintainable system.
+
+
+
 
 % --- STEP 8 ---
 \subsection{Step 8: Operational View Specification}
-% --- Person 3 (BELAL) writes here ---
-% Outline operational aspects like performance, reliability, security, and scalability.
+The operational view outlines the non-functional aspects of the system, focusing on how it will run, maintain itself, and perform under real-world conditions. This section details the key considerations for performance, reliability, and security to ensure the system is not only functional but also robust and trustworthy.
 
-% test ref 1
-\cite{trustmebro2025}
+\subsubsection{Performance and Scalability}
+Performance is critical for a security system where response time directly impacts effectiveness.
+
+\begin{itemize}
+    \item \textbf{Latency:} The end-to-end latency, from sensor event detection to user notification delivery, is targeted to be under two seconds. This is achieved by:
+    \begin{itemize}
+        \item Using lightweight communication protocols (MQTT) with low overhead.
+        \item Employing an edge-processing model at the IoT hub to filter non-critical events locally.
+        \item Leveraging a scalable, low-latency cloud backend with efficient rule processing and push notification services (e.g., APNS, FCM).
+    \end{itemize}
+    
+    \item \textbf{Throughput:} The system is designed to handle concurrent events from multiple sensors without performance degradation. The cloud backend's message broker (e.g., AWS IoT Core) is capable of ingesting millions of messages per second, ensuring that event storms (e.g., multiple doors opening during a break-in) are processed in parallel.
+    
+    \item \textbf{Scalability:} The architecture is designed to scale horizontally. As users add more devices, the cloud infrastructure can automatically provision more resources (e.g., via auto-scaling groups or serverless functions). The use of a topic-based messaging system (MQTT) allows for the seamless addition of new sensors and zones without reconfiguring the entire system.
+\end{itemize}
+
+\subsubsection{Reliability and Availability}
+The system must be highly reliable, as downtime could result in a critical security lapse.
+
+\begin{itemize}
+    \item \textbf{Device Reliability:} Battery-powered sensors will use low-power protocols like Zigbee to maximize lifespan. The system will implement a health monitoring mechanism where each device periodically sends a "heartbeat" signal. The mobile application will alert the user of low battery levels or if a device goes offline unexpectedly.
+    
+    \item \textbf{Network Resilience:} In the event of an internet outage, the local IoT hub is designed to operate with degraded functionality. It will still be able to trigger local actuators, such as a siren, based on sensor input. MQTT's Quality of Service (QoS) level 1 will be used for critical messages to ensure "at-least-once" delivery to the cloud broker once connectivity is restored.
+    
+    \item \textbf{High Availability:} The cloud backend will be deployed on a major cloud provider (e.g., AWS, Azure) with high uptime Service Level Agreements (SLAs), typically 99.9\% or higher. Services will be deployed across multiple availability zones to ensure redundancy and fault tolerance against single-datacenter failures.
+    
+    \item \textbf{Data Integrity:} Critical data, such as event logs and user settings, will be stored in a replicated database with automated backup procedures to prevent data loss.
+\end{itemize}
+
+\subsubsection{Security Considerations}
+As a security system, its own digital and physical security is paramount. A multi-layered security approach is adopted:
+
+\begin{itemize}
+    \item \textbf{Device Security:} Each IoT device will be provisioned with a unique cryptographic identity (e.g., X.509 certificate) during setup. This ensures that only authenticated and authorized devices can connect to the IoT hub and the cloud backend, preventing device spoofing.
+    
+    \item \textbf{Communication Security:} All communication channels are encrypted.
+    \begin{itemize}
+        \item Device-to-hub wireless communication will use protocol-level encryption (e.g., Zigbee's AES-128 or Wi-Fi's WPA3).
+        \item Hub-to-cloud and app-to-cloud communication will be encrypted using Transport Layer Security (TLS 1.2+), securing both MQTT and HTTPS traffic against eavesdropping and man-in-the-middle attacks.
+    \end{itemize}
+    
+    \item \textbf{Cloud Security:} The cloud environment will be hardened using the principle of least privilege. Access to resources will be strictly controlled via Identity and Access Management (IAM) roles. Regular security audits and vulnerability scanning will be performed.
+    
+    \item \textbf{Application and Data Security:} User access to the mobile application will be protected by strong authentication (OAuth 2.0). Support for two-factor authentication (2FA) will be provided. The system will implement Role-Based Access Control (RBAC) to define different permission levels (e.g., Owner, Family Member, Guest). All sensitive data, particularly video recordings, will be encrypted both at rest in cloud storage and in transit.
+\end{itemize}
 
 % --- STEP 9 ---
 \subsection{Step 9: Device \& Component Integration}
@@ -324,6 +525,9 @@ The integration follows a layered approach:
     \item \textbf{Cloud Services:} A cloud backend (e.g., AWS IoT Core) processes events, manages device states, and stores logs and camera feeds.
     \item \textbf{Mobile Application:} The app subscribes to MQTT topics and REST APIs to display alerts, logs, and live video streams to the user.
 \end{itemize}
+
+
+
 
 \subsubsection{Communication Flow}
 \begin{enumerate}
@@ -395,6 +599,7 @@ The integration follows a layered approach:
   \label{fig:device_integration_tikz}
 
 \end{figure}
+\FloatBarrier
 
 
 % --- STEP 10 ---
@@ -414,6 +619,8 @@ The app follows a modern, accessible design (dark/light themes). Primary navigat
   %\item \textbf{Cameras:} Grid of cameras with \emph{Live} view and \emph{Recordings}. Each camera supports start/stop record and snapshot.
   \item \textbf{Alerts:} Feed of events (icons, time, location) with inline thumbnails and \emph{View Footage}.
 \end{itemize}
+
+\FloatBarrier
 
 \subsubsection{UI Flow (Conceptual)}
 .
@@ -452,6 +659,8 @@ The app follows a modern, accessible design (dark/light themes). Primary navigat
   \caption{Navigation and event-driven flow including camera auto-trigger.}
 \end{figure}
 
+\FloatBarrier
+
 %\subsubsection{Technical Implementation}
 \subsubsection{Platforms}
 Cross-platform mobile app using \textbf{Flutter}.
@@ -481,6 +690,8 @@ App Mockup
   \caption{Smart Home Security app mockups showing Home, Door/Window, Motion, and Alerts with camera thumbnails.}
 \end{figure}
 
+\FloatBarrier
+
 \subsubsection{Traceability (Features to Screens)}
 \begin{center}
 \begin{tabularx}{\linewidth}{@{}lX@{}}
@@ -502,13 +713,11 @@ Monitoring Dashboard & Home overview; Events log on Alerts \\
 
 
 \section{Conclusion}
-% Summarize the key design decisions made throughout the 10 steps.
-% Reiterate the capabilities of the proposed system.
-% Briefly mention future work or potential improvements.
+This paper has presented a comprehensive blueprint for an IoT-based Smart Home Security System, achieved through the rigorous application of the 10-step IoT design methodology. The resulting design specifies a robust, multi-layered architecture that is secure, scalable, and user-centric. By detailing every stage from requirement analysis and system modeling to component integration and application development, this work establishes a solid foundation for the physical implementation and future enhancement of the system. The proposed design effectively addresses the core challenge of modern home security by creating an intelligent, responsive, and reliable solution.
 
 
 \section*{Acknowledgment}
-The authors wish to thank the teaching staff of the Computer and Systems Engineering Department at Ain Shams University for their guidance and support throughout this project.
+Sincere gratitude is extended to Dr. Islam Tharwat Abdel Halim and Eng. Hamdy Osama Mohammed El-Sayed Farag from the Computer and Systems Engineering Department at Ain Shams University for the invaluable guidance, continuous support, and insightful feedback that were provided throughout the course of this project.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -520,4 +729,3 @@ The authors wish to thank the teaching staff of the Computer and Systems Enginee
 \bibliography{references}
 
 \end{document}
-
