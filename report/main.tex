@@ -100,7 +100,8 @@ This section details the design of the Smart Home Security System following the 
 % --- STEP 1 ---
 \subsection{Step 1: Purpose \& Requirements Specification}
 The primary purpose of this IoT system is to enhance home security by providing real-time detection of unauthorized entry or suspicious activity and notifying homeowners immediately \cite{yamini_home_intrusion_2016, achtaich2021guidelines, seerangan_domain_specific_iot_home_automation_2022}. This system aims to be a proactive deterrent and a reliable monitoring tool, offering peace of mind to the user by integrating physical sensors with a smart notification platform.
-\subsubsection{\textbf{Functional Requirements:} \cite{wang_iot_devices_security_2024, design_implementation_smart_home_IoT_2024}}
+\subsubsection{\textbf{Functional Requirements:}}
+Functional requirements such as door/window monitoring, motion sensing, and camera integration follow standards highlighted in both recent specifications and case studies \cite{wang_iot_devices_security_2024, design_implementation_smart_home_IoT_2024}.
 \begin{itemize}
     \item \textbf{Door/Window Monitoring:} The system must use magnetic sensors to detect when a door or window is opened and register this as a potential intrusion event.
     \item \textbf{Motion Detection:} PIR motion sensors must be able to detect human movement within designated areas of the home.
@@ -109,7 +110,7 @@ The primary purpose of this IoT system is to enhance home security by providing 
     \item \textbf{Remote Control:} The homeowner must have the ability to arm or disarm the system and remotely control connected devices, such as activating a siren or turning on lights.
     \item \textbf{Monitoring Dashboard:} The mobile application must provide a live view of all sensor statuses and a log of past events.
 \end{itemize}
-\subsubsection{\textbf{Non-Functional Requirements:} \cite{wang_iot_devices_security_2024}}
+\subsubsection{\textbf{Non-Functional Requirements:}}Non-functional requirements, such as reliability, secure communication, scalability, and energy efficiency, are informed by IETF drafts and smart device standards \cite{wang_iot_devices_security_2024}.
 \begin{itemize}
     \item \textbf{High Reliability:} The system must be highly reliable with a low rate of false alarms to maintain user trust.
     \item \textbf{Secure Communication:} All data transmission between sensors, the IoT hub, and the cloud must be encrypted to prevent eavesdropping or tampering.
