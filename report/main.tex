@@ -89,9 +89,9 @@ Internet of Things, IoT, Smart Home, Security System, System Design, Cisco Packe
 
 \section{Introduction}
 
-The Internet of Things (IoT) has emerged as a transformative technology, connecting everyday objects to the internet and enabling intelligent automation and monitoring. One of the most impactful applications of IoT is in the domain of smart home systems, where connected devices enhance convenience, energy efficiency, and security. Home security, in particular, has seen significant innovation through IoT, moving from traditional isolated alarm systems to interconnected, responsive networks that provide homeowners with real-time awareness and control.
+The Internet of Things (IoT) has emerged as a transformative technology, connecting everyday objects to the internet and enabling intelligent automation and monitoring\cite{startertutorials_IoT_methodology, achtaich2021guidelines, seerangan_domain_specific_iot_home_automation_2022, article_S266729522100026X}. One of the most impactful applications of IoT is in the domain of smart home systems, where connected devices enhance convenience, energy efficiency, and security \cite{yamini_home_intrusion_2016, design_implementation_smart_home_IoT_2024, sharma_iot_based_smart_home_automation_2020, zwemer_smart_home_iot_part2_2015}. Home security, in particular, has seen significant innovation through IoT, moving from traditional isolated alarm systems to interconnected, responsive networks that provide homeowners with real-time awareness and control\cite{tipirisetty_home_automation_case_study_2025, startertutorials_IoT_methodology}.
 
-This paper details the design of an IoT-based Smart Home Security System. The primary objective is to create a robust and reliable system that detects potential intrusions and promptly alerts the homeowner. To ensure a thorough and systematic design, we adhere to the 10-step IoT design methodology, covering all aspects from initial requirements to application development. The following sections will elaborate on each step of this methodology, providing a complete blueprint for the system's architecture and functionality.
+This paper details the design of an IoT-based Smart Home Security System. The primary objective is to create a robust and reliable system that detects potential intrusions and promptly alerts the homeowner. To ensure a thorough and systematic design, we adhere to the 10-step IoT design methodology \cite{seerangan_domain_specific_iot_home_automation_2022}, covering all aspects from initial requirements to application development.The following sections will elaborate on each step of this methodology, providing a complete blueprint for the system's architecture and functionality.
 
 
 \section{IoT System Design Methodology}
@@ -99,8 +99,8 @@ This section details the design of the Smart Home Security System following the 
 
 % --- STEP 1 ---
 \subsection{Step 1: Purpose \& Requirements Specification}
-The primary purpose of this IoT system is to enhance home security by providing real-time detection of unauthorized entry or suspicious activity and notifying homeowners immediately. This system aims to be a proactive deterrent and a reliable monitoring tool, offering peace of mind to the user by integrating physical sensors with a smart notification platform.
-\subsubsection{\textbf{Functional Requirements:}}
+The primary purpose of this IoT system is to enhance home security by providing real-time detection of unauthorized entry or suspicious activity and notifying homeowners immediately \cite{yamini_home_intrusion_2016, achtaich2021guidelines, seerangan_domain_specific_iot_home_automation_2022}. This system aims to be a proactive deterrent and a reliable monitoring tool, offering peace of mind to the user by integrating physical sensors with a smart notification platform.
+\subsubsection{\textbf{Functional Requirements:} \cite{wang_iot_devices_security_2024, design_implementation_smart_home_IoT_2024}}
 \begin{itemize}
     \item \textbf{Door/Window Monitoring:} The system must use magnetic sensors to detect when a door or window is opened and register this as a potential intrusion event.
     \item \textbf{Motion Detection:} PIR motion sensors must be able to detect human movement within designated areas of the home.
@@ -109,7 +109,7 @@ The primary purpose of this IoT system is to enhance home security by providing 
     \item \textbf{Remote Control:} The homeowner must have the ability to arm or disarm the system and remotely control connected devices, such as activating a siren or turning on lights.
     \item \textbf{Monitoring Dashboard:} The mobile application must provide a live view of all sensor statuses and a log of past events.
 \end{itemize}
-\subsubsection{Non-Functional Requirements:}
+\subsubsection{\textbf{Non-Functional Requirements:} \cite{wang_iot_devices_security_2024}}
 \begin{itemize}
     \item \textbf{High Reliability:} The system must be highly reliable with a low rate of false alarms to maintain user trust.
     \item \textbf{Secure Communication:} All data transmission between sensors, the IoT hub, and the cloud must be encrypted to prevent eavesdropping or tampering.
@@ -124,7 +124,7 @@ The primary purpose of this IoT system is to enhance home security by providing 
 % --- Person 1 (SALMA) writes here ---
 % Describe the main processes of the system (e.g., intrusion detection, alerting).
 % You can add a flowchart figure here later.
-The core process of the system involves a continuous cycle of sensing, processing, and reacting. This process is initiated by a physical event and culminates in a user notification and, potentially, an automated action.
+The core process of the system involves a continuous cycle of sensing, processing, and reacting. This process is initiated by a physical event and culminates in a user notification and, potentially, an automated action\cite{startertutorials_IoT_methodology, cisco_packettracer_iot}.
 \begin{itemize}
     \item \textbf{Event Detection}: The process begins when a sensor is triggered. A magnetic sensor detects the state change from a closed door to an open door, or a PIR sensor detects a change in infrared radiation, indicating movement.
     \item \textbf{Data Transmission:} The triggered sensor sends a wireless signal (e.g., via Zigbee or Wi-Fi) containing event data (e.g., "door\_sensor\_1: open") to the central IoT hub.
@@ -144,7 +144,7 @@ The core process of the system involves a continuous cycle of sensing, processin
 \subsection{Step 3: Domain Model Specification}
 The domain model specifies the main entities of the Smart Home Security System and
 the relationships between them. It provides a conceptual blueprint of how different
-components interact within the system.
+components interact within the system \cite{achtaich2021guidelines, seerangan_domain_specific_iot_home_automation_2022, zwemer_smart_home_iot_part2_2015}.
 
 \subsubsection{Entities}
 \begin{itemize}
@@ -182,7 +182,7 @@ components interact within the system.
 % --- Person 2 (AHMED) writes here ---
 % A. Specify the data generated by each component (e.g., sensor status, video stream).
 % B. Detail the structure and flow of information through the system.
-The information model defines the data elements used, generated, and exchanged within the Smart Home Security System. It ensures consistency in how information flows across devices, the IoT hub, the cloud, and the user application.
+The information model defines the data elements used, generated, and exchanged within the Smart Home Security System. It ensures consistency in how information flows across devices, the IoT hub, the cloud, and the user application \cite{wang_iot_devices_security_2024, article_S266729522100026X}.
 
 \subsubsection{Data Generated by Components}
 \begin{itemize}
@@ -196,7 +196,7 @@ The information model defines the data elements used, generated, and exchanged w
 \end{itemize}
 
 \subsubsection{Information Flow}
-The system’s data pipeline follows a structured flow:
+The system’s data pipeline follows a structured flow: 
 \begin{enumerate}
     \item Sensors capture physical events (open/close, motion).
     \item Data is transmitted wirelessly (Zigbee/Wi-Fi) to the IoT hub.
@@ -254,7 +254,7 @@ The system’s data pipeline follows a structured flow:
 
 % --- STEP 5 ---
 \subsection{Step 5: Service Specifications}
-The service specifications define the logical services offered by the IoT system. These services represent the core functionalities and are exposed through well-defined interfaces (e.g., REST APIs, MQTT topics) that allow different components of the system to interact. These services are primarily hosted and executed within the cloud backend (Level 3).
+The service specifications define the logical services offered by the IoT system \cite{design_implementation_smart_home_IoT_2024}. These services represent the core functionalities and are exposed through well-defined interfaces (e.g., REST APIs, MQTT topics) that allow different components of the system to interact. These services are primarily hosted and executed within the cloud backend (Level 3)\cite{tipirisetty_home_automation_case_study_2025, startertutorials_IoT_methodology, sharma_iot_based_smart_home_automation_2020}.
 
 \subsubsection{Intrusion Detection Service}
 This is the central logic service responsible for analyzing incoming events and determining if a security threat exists.
@@ -320,7 +320,7 @@ This service handles all functionalities related to the IP cameras, including li
 % --- Person 3 (BELAL) writes here ---
 % Specify the system's mapping to different IoT levels (e.g., Device, Network, Application).
 % Describe how these levels interact.
-The system architecture is structured across multiple IoT levels:
+The system architecture is structured across multiple IoT levels \cite{seerangan_domain_specific_iot_home_automation_2022, cisco_gateway}:
 \begin{itemize}
     \item \textbf{Level 1 (Perception/Device Layer):} This is the physical layer responsible for sensing the environment. It includes the door/window magnetic sensors, PIR motion sensors, and cameras that collect the raw data.
 
@@ -333,7 +333,7 @@ The system architecture is structured across multiple IoT levels:
 
 % --- STEP 7 ---
 \subsection{Step 7: Functional View Specification}
-The functional view specifies the system's high-level functional blocks and their interactions, abstracting away the specific implementation details. This view organizes the system into logical components based on their role in achieving the overall functionality.
+The functional view specifies the system's high-level functional blocks and their interactions, abstracting away the specific implementation details. This view organizes the system into logical components based on their role in achieving the overall functionality \cite{startertutorials_IoT_methodology, achtaich2021guidelines, tipirisetty_home_automation_case_study_2025, zwemer_smart_home_iot_part2_2015}.
 
 \subsubsection{Functional Blocks}
 The Smart Home Security System is decomposed into the following key functional blocks:
@@ -436,7 +436,7 @@ This decoupled architecture ensures that each block can be developed, tested, an
 
 % --- STEP 8 ---
 \subsection{Step 8: Operational View Specification}
-The operational view outlines the non-functional aspects of the system, focusing on how it will run, maintain itself, and perform under real-world conditions. This section details the key considerations for performance, reliability, and security to ensure the system is not only functional but also robust and trustworthy.
+The operational view outlines the non-functional aspects of the system, focusing on how it will run, maintain itself, and perform under real-world conditions. This section details the key considerations for performance, reliability, and security to ensure the system is not only functional but also robust and trustworthy \cite{wang_iot_devices_security_2024, design_implementation_smart_home_IoT_2024, article_S266729522100026X}.
 
 \subsubsection{Performance and Scalability}
 Performance is critical for a security system where response time directly impacts effectiveness.
@@ -486,7 +486,7 @@ As a security system, its own digital and physical security is paramount. A mult
 
 % --- STEP 9 ---
 \subsection{Step 9: Device \& Component Integration}
-The Smart Home Security System integrates a range of IoT hardware components, each chosen for its reliability, cost-effectiveness, and compatibility with standard IoT protocols. Table~\ref{tab:devices-wide} summarizes the devices and their functions.
+The Smart Home Security System integrates a range of IoT hardware components, each chosen for its reliability, cost-effectiveness, and compatibility with standard IoT protocols. Table~\ref{tab:devices-wide} summarizes the devices and their functions \cite{seerangan_domain_specific_iot_home_automation_2022, tipirisetty_home_automation_case_study_2025, cisco_gateway, cisco_packettracer_iot}.
 
 % preamble once:
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
@@ -606,7 +606,7 @@ The integration follows a layered approach:
 \subsection{Step 10: Application Development}
 
 \subsubsection{Application Overview}
-The mobile application provides homeowners with real-time visibility and control over their smart home security system. Core capabilities include device status monitoring, remote control, event notifications, and \textbf{camera integration} for live view and recorded evidence.
+The mobile application provides homeowners with real-time visibility and control over their smart home security system. Core capabilities include device status monitoring, remote control, event notifications, and \textbf{camera integration} for live view and recorded evidence \cite{startertutorials_IoT_methodology, design_implementation_smart_home_IoT_2024, yamini_home_intrusion_2016, sharma_iot_based_smart_home_automation_2020}.
 
 \subsubsection{User Interface (UI)}
 The app follows a modern, accessible design (dark/light themes). Primary navigation uses a bottom tab bar: \emph{Home}, \emph{Devices}, \emph{Cameras}, and \emph{Alerts}.
